@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/edu.ustb.sei.mde.compare/src-gen" modelPluginID="edu.ustb.sei.mde.compare"
+    modelName="Myconflict" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    importerID="org.eclipse.emf.importer.ecore" complianceLevel="5.0" copyrightFields="false"
+    operationReflection="true" importOrganizing="true">
+  <foreignModel>myconflict.ecore</foreignModel>
+  <genPackages prefix="Myconflict" basePackage="edu.ustb.sei.mde.compare" disposableProviderFactory="true"
+      ecorePackage="myconflict.ecore#/">
+    <genClasses ecoreClass="myconflict.ecore#//MyConflicts">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference myconflict.ecore#//MyConflicts/conflicts"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute myconflict.ecore#//MyConflicts/baseURI"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute myconflict.ecore#//MyConflicts/branchURIs"/>
+    </genClasses>
+    <genClasses ecoreClass="myconflict.ecore#//MyConflict">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference myconflict.ecore#//MyConflict/tuples"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute myconflict.ecore#//MyConflict/information"/>
+    </genClasses>
+    <genClasses ecoreClass="myconflict.ecore#//Tuple">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute myconflict.ecore#//Tuple/branch"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference myconflict.ecore#//Tuple/eObject"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference myconflict.ecore#//Tuple/eStructuralFeature"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute myconflict.ecore#//Tuple/position"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>
