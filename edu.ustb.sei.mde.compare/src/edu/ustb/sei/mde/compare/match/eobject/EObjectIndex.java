@@ -10,8 +10,10 @@
  *******************************************************************************/
 package edu.ustb.sei.mde.compare.match.eobject;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.eclipse.emf.ecore.EObject;
@@ -90,6 +92,10 @@ public interface EObjectIndex {
 	// lyt
 	Map<Side, EObject> findClosests(Comparison comparisonADD, EObject a, Side aSide,
 			MultiKeyMap<EObject, Double> distanceMap);
+	
+	// lyt
+	Map<Side, EObject> findClosests(Comparison comparisonSimilar, EObject a, Side aSide,
+			Map<EObject, List<EObject>> eObjectSimilarMap);
 
 }
 

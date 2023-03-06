@@ -21,6 +21,8 @@ import static java.util.Collections.emptyIterator;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.apache.log4j.Logger;
@@ -43,7 +45,6 @@ import edu.ustb.sei.mde.compare.match.eobject.IdentifierEObjectMatcher;
 import edu.ustb.sei.mde.compare.match.eobject.ProximityEObjectMatcher;
 import edu.ustb.sei.mde.compare.match.eobject.WeightProvider;
 import edu.ustb.sei.mde.compare.match.eobject.WeightProviderDescriptorRegistryImpl;
-import edu.ustb.sei.mde.compare.match.eobject.internal.ByTypeIndex;
 import edu.ustb.sei.mde.compare.match.resource.IResourceMatcher;
 import edu.ustb.sei.mde.compare.match.resource.IResourceMatchingStrategy;
 import edu.ustb.sei.mde.compare.match.resource.StrategyResourceMatcher;
@@ -319,7 +320,7 @@ public class DefaultMatchEngine implements IMatchEngine {
 		getEObjectMatcher().createMatches(comparison, leftEObjects, rightEObjects, originEObjects, monitor);
 
 	}
-
+	
 	/**
 	 * This will query the scope for the given {@link EObject}s' children, then delegate to an
 	 * {@link IEObjectMatcher} to compute the Matches.
@@ -522,6 +523,15 @@ public class DefaultMatchEngine implements IMatchEngine {
 		
 		getEObjectMatcher().createMatches(comparisonADD, leftEObjects.iterator(), 
 				rightEObjects.iterator(), emptyIterator(), distanceMap);
+		
+	}
+	
+	// lyt
+	public void match(Comparison comparisonSimilar, Iterator<? extends EObject> leftEObjects,
+			Iterator<? extends EObject> rightEObjects, Map<EObject, List<EObject>> eObjectSimilarTreeMap) {
+		
+		getEObjectMatcher().createMatches(comparisonSimilar, leftEObjects, 
+				rightEObjects, emptyIterator(), eObjectSimilarTreeMap);
 		
 	}
 }

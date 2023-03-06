@@ -14,14 +14,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.eclipse.emf.ecore.EObject;
@@ -169,7 +172,22 @@ public class ProximityIndex implements EObjectIndex, MatchAheadOfTime {
 		 * is also based on the assumption that calling distance() with a 0 max distance triggers shortcuts
 		 * and is faster than calling the same distance() method with a max_distance > 0.
 		 */
+		
+
+		// lyt: test
+		if(eObj.getClass().getName().contains("EClassImpl")) {
+			System.out.println(eObj);
+			System.out.println(storageToSearchFor.size());
+			System.out.println();
+		}
+		
+		
+		
+		
+		
 		Candidate best = findIdenticMatch(inProgress, eObj, storageToSearchFor);
+		
+		
 		if (best.some()) {
 			return best.eObject;
 		}
@@ -214,7 +232,7 @@ public class ProximityIndex implements EObjectIndex, MatchAheadOfTime {
 		}
 		return best.eObject;
 	}
-
+	
 	/**
 	 * Look for a perfect match (identic content) in the given list of candidates.
 	 * 
@@ -394,6 +412,37 @@ public class ProximityIndex implements EObjectIndex, MatchAheadOfTime {
 	}
 	
 	// lyt
+	public Map<Side, EObject> findClosests(Comparison inProgress, EObject eObj, Side passedObjectSide,
+			Map<EObject, List<EObject>> eObjectSimilarMap) {
+
+		if (!readyForThisTest(inProgress, eObj)) {
+			return null;
+		}
+		Map<Side, EObject> result = new HashMap<EObjectIndex.Side, EObject>(3);
+		result.put(passedObjectSide, eObj);
+		if (passedObjectSide == Side.LEFT) {
+			EObject closestRight = findTheClosest(inProgress, eObj, Side.LEFT, Side.RIGHT, true, eObjectSimilarMap);
+			EObject closestOrigin = findTheClosest(inProgress, eObj, Side.LEFT, Side.ORIGIN, true, eObjectSimilarMap);
+			result.put(Side.RIGHT, closestRight);
+			result.put(Side.ORIGIN, closestOrigin);
+			
+		} else if (passedObjectSide == Side.RIGHT) {
+			EObject closestLeft = findTheClosest(inProgress, eObj, Side.RIGHT, Side.LEFT, true, eObjectSimilarMap);
+			EObject closestOrigin = findTheClosest(inProgress, eObj, Side.RIGHT, Side.ORIGIN, true, eObjectSimilarMap);
+			result.put(Side.LEFT, closestLeft);
+			result.put(Side.ORIGIN, closestOrigin);
+
+		} else if (passedObjectSide == Side.ORIGIN) {
+			EObject closestLeft = findTheClosest(inProgress, eObj, Side.ORIGIN, Side.LEFT, true, eObjectSimilarMap);
+			EObject closestRight = findTheClosest(inProgress, eObj, Side.ORIGIN, Side.RIGHT, true, eObjectSimilarMap);
+			result.put(Side.LEFT, closestLeft);
+			result.put(Side.RIGHT, closestRight);
+		}
+
+		return result;
+	}
+	
+	// lyt
 	private EObject findTheClosest(Comparison inProgress, final EObject eObj, final Side originalSide,
 			final Side sideToFind, boolean shouldDoubleCheck, MultiKeyMap<EObject, Double> distanceMap) {
 		Set<EObject> storageToSearchFor = lefts;
@@ -469,6 +518,86 @@ public class ProximityIndex implements EObjectIndex, MatchAheadOfTime {
 			}
 		}
 
+		if (!best.some()) {
+			stats.noMatch();
+		}
+		return best.eObject;
+	}
+
+	// lyt
+	private EObject findTheClosest(Comparison inProgress, final EObject eObj, final Side originalSide,
+			final Side sideToFind, boolean shouldDoubleCheck, Map<EObject, List<EObject>> eObjectSimilarTreeMap) {
+		
+		Set<EObject> storageToSearchFor = lefts;
+		switch (sideToFind) {
+			case RIGHT:
+				storageToSearchFor = rights;
+				break;
+			case LEFT:
+				storageToSearchFor = lefts;
+				break;
+			case ORIGIN:
+				storageToSearchFor = origins;
+				break;
+	
+			default:
+				break;
+		}
+		
+		/*
+		 * We are starting by looking for EObject having a distance of 0. It means we'll iterate two times in
+		 * the worst case but it is very likely that the EObject has another version with a distance of 0. It
+		 * is also based on the assumption that calling distance() with a 0 max distance triggers shortcuts
+		 * and is faster than calling the same distance() method with a max_distance > 0.
+		 */
+		
+		Candidate best = new Candidate();	// best.distance = Double.MAX_VALUE
+		
+		List<EObject> similarList = new ArrayList<>();
+		if(sideToFind == sideToFind.RIGHT) {
+			eObjectSimilarTreeMap.put(eObj, similarList);
+		}
+
+		SortedMap<Double, EObject> candidates = Maps.newTreeMap();
+		/*
+		 * We could not find an EObject which is identical, let's search again and find the closest EObject.
+		 */
+		Iterator<EObject> it = storageToSearchFor.iterator();
+		while (it.hasNext()) {
+			EObject potentialClosest = it.next();
+			double dist = meter.distance(inProgress, eObj, potentialClosest);
+			
+			if(dist != Double.MAX_VALUE) {
+				similarList.add(potentialClosest);
+			}
+			
+			stats.similarityCompare();
+			if (dist < best.distance) {
+				if (shouldDoubleCheck) {
+					// We need to double check the currentlyDigging has the same object as the closest !
+					candidates.put(Double.valueOf(dist), potentialClosest);
+				} else {
+					best.distance = dist;
+					best.eObject = potentialClosest;
+				}
+			}
+		}
+		if (shouldDoubleCheck) {
+			for (Entry<Double, EObject> entry : candidates.entrySet()) {
+				EObject doubleCheck = findTheClosest(inProgress, entry.getValue(), sideToFind, originalSide,
+						false);
+				stats.doubleCheck();
+				if (doubleCheck == eObj) {
+					stats.similaritySuccess();
+					best.eObject = entry.getValue();
+					best.distance = entry.getKey().doubleValue();
+					break;
+				} else {
+					stats.failedDoubleCheck();
+				}
+			}
+		}
+	
 		if (!best.some()) {
 			stats.noMatch();
 		}

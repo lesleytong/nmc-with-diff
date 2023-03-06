@@ -16,13 +16,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.eclipse.emf.common.util.BasicEList;
@@ -290,7 +288,9 @@ public class ProximityEObjectMatcher implements IEObjectMatcher, ScopeQuery {
 		assert aSide != bSide;
 		assert bSide != cSide;
 		assert cSide != aSide;
+				
 		Map<Side, EObject> closests = index.findClosests(comparison, a, aSide);
+		
 		if (closests != null) {
 			EObject lObj = closests.get(bSide);
 			EObject aObj = closests.get(cSide);
@@ -461,6 +461,40 @@ public class ProximityEObjectMatcher implements IEObjectMatcher, ScopeQuery {
 //		createUnmatchesForRemainingObjects(comparisonADD);
 //		restructureMatchModel(comparisonADD);
 	}
+	
+	// lyt
+	public void createMatches(Comparison comparisonSimilar, Iterator<? extends EObject> leftEObjects,
+			Iterator<? extends EObject> rightEObjects, Iterator<? extends EObject> originEObjects, Map<EObject, List<EObject>> eObjectSimilarTreeMap) {
+		
+		if (!leftEObjects.hasNext() && !rightEObjects.hasNext() && !originEObjects.hasNext()) {
+			return;
+		}
+		
+		while (leftEObjects.hasNext() || rightEObjects.hasNext() || originEObjects.hasNext()) {
+
+			if (leftEObjects.hasNext()) {
+				EObject next = leftEObjects.next();
+				index.index(next, Side.LEFT);
+				eObjectsToSide.put(next, Side.LEFT);
+			}
+
+			if (rightEObjects.hasNext()) {
+				EObject next = rightEObjects.next();
+				index.index(next, Side.RIGHT);
+				eObjectsToSide.put(next, Side.RIGHT);
+			}
+
+			if (originEObjects.hasNext()) {
+				EObject next = originEObjects.next();
+				index.index(next, Side.ORIGIN);
+				eObjectsToSide.put(next, Side.ORIGIN);
+			}
+
+		}
+
+		matchIndexedObjects(comparisonSimilar, eObjectSimilarTreeMap);
+		
+	}
 
 	// lyt
 	private void matchIndexedObjects(Comparison comparisonADD, MultiKeyMap<EObject, Double> distanceMap) {
@@ -472,6 +506,20 @@ public class ProximityEObjectMatcher implements IEObjectMatcher, ScopeQuery {
 		todo = index.getValuesStillThere(Side.RIGHT);
 		while (todo.iterator().hasNext()) {
 			todo = matchList(comparisonADD, todo, true, distanceMap);
+		}
+		
+	}
+	
+	// lyt
+	private void matchIndexedObjects(Comparison comparisonSimilar, Map<EObject, List<EObject>> eObjectSimilarTreeMap) {
+		
+		Iterable<EObject> todo = index.getValuesStillThere(Side.LEFT);
+		while (todo.iterator().hasNext()) {
+			todo = matchList(comparisonSimilar, todo, true, eObjectSimilarTreeMap);
+		}
+		todo = index.getValuesStillThere(Side.RIGHT);
+		while (todo.iterator().hasNext()) {
+			todo = matchList(comparisonSimilar, todo, true, eObjectSimilarTreeMap);
 		}
 		
 	}
@@ -505,6 +553,43 @@ public class ProximityEObjectMatcher implements IEObjectMatcher, ScopeQuery {
 			 */
 			if (comparisonADD.getMatch(next) == null) {
 				if (!tryToMatch(comparisonADD, next, createUnmatches, distanceMap)) {
+					remainingResult.add(next);
+				}
+			}
+		}
+		return remainingResult;
+		
+	}
+	
+	// lyt
+	private Iterable<EObject> matchList(Comparison comparisonSimilar, Iterable<EObject> todoList,
+			boolean createUnmatches, Map<EObject, List<EObject>> eObjectSimilarTreeMap) {
+		
+		Set<EObject> remainingResult = Sets.newLinkedHashSet();
+		List<EObject> requiredContainers = Lists.newArrayList();
+		Iterator<EObject> todo = todoList.iterator();
+		while (todo.hasNext()) {
+			EObject next = todo.next();
+			/*
+			 * Let's first add every container which is in scope
+			 */
+			EObject container = next.eContainer();
+			while (container != null && isInScope(container)) {
+				if (comparisonSimilar.getMatch(container) == null) {
+					requiredContainers.add(0, container);
+				}
+				container = container.eContainer();
+			}
+		}
+		Iterator<EObject> containersAndTodo = Iterators.concat(requiredContainers.iterator(),
+				todoList.iterator());	// 父节点在前
+		while (containersAndTodo.hasNext()) {
+			EObject next = containersAndTodo.next();
+			/*
+			 * At this point you need to be sure the element has not been matched in any other way before.
+			 */
+			if (comparisonSimilar.getMatch(next) == null) {
+				if (!tryToMatch(comparisonSimilar, next, createUnmatches, eObjectSimilarTreeMap)) {
 					remainingResult.add(next);
 				}
 			}
@@ -549,6 +634,49 @@ public class ProximityEObjectMatcher implements IEObjectMatcher, ScopeQuery {
 				okToMatch = true;
 			} else if (createUnmatches) {
 				areMatching(comparisonADD, closests.get(Side.LEFT), closests.get(Side.RIGHT),
+						closests.get(Side.ORIGIN));
+				okToMatch = true;
+			}
+		}
+		return okToMatch;
+	}
+	
+	// lyt
+	private boolean tryToMatch(Comparison comparisonSimilar, EObject a, boolean createUnmatches,
+			Map<EObject, List<EObject>> eObjectSimilarTreeMap) {
+		
+		boolean okToMatch = false;
+		Side aSide = eObjectsToSide.get(a);
+		assert aSide != null;
+		Side bSide = Side.LEFT;
+		Side cSide = Side.RIGHT;
+		if (aSide == Side.RIGHT) {
+			bSide = Side.LEFT;
+			cSide = Side.ORIGIN;
+		} else if (aSide == Side.LEFT) {
+			bSide = Side.RIGHT;
+			cSide = Side.ORIGIN;
+		} else if (aSide == Side.ORIGIN) {
+			bSide = Side.LEFT;
+			cSide = Side.RIGHT;
+		}
+		assert aSide != bSide;
+		assert bSide != cSide;
+		assert cSide != aSide;
+		
+		// lyt
+		Map<Side, EObject> closests = index.findClosests(comparisonSimilar, a, aSide, eObjectSimilarTreeMap);
+		
+		if (closests != null) {
+			EObject lObj = closests.get(bSide);
+			EObject aObj = closests.get(cSide);
+			if (lObj != null || aObj != null) {
+				// we have at least one other match
+				areMatching(comparisonSimilar, closests.get(Side.LEFT), closests.get(Side.RIGHT),
+						closests.get(Side.ORIGIN));
+				okToMatch = true;
+			} else if (createUnmatches) {
+				areMatching(comparisonSimilar, closests.get(Side.LEFT), closests.get(Side.RIGHT),
 						closests.get(Side.ORIGIN));
 				okToMatch = true;
 			}

@@ -648,4 +648,13 @@ public class IdentifierEObjectMatcher implements IEObjectMatcher {
 		
 		
 	}
+	
+	// lyt
+	public void createMatches(Comparison comparisonSimilar, Iterator<? extends EObject> leftEObjects,
+			Iterator<? extends EObject> rightEObjects, Iterator<? extends EObject> originEObjects,
+			Map<EObject, List<EObject>> eObjectSimilarMap) {
+		
+		
+		
+	}
 }

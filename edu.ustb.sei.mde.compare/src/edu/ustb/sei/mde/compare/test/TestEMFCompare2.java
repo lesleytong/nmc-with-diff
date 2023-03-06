@@ -36,16 +36,16 @@ public class TestEMFCompare2 {
 		resourceSet.getPackageRegistry().put(EcorePackage.eNS_URI, EcorePackage.eINSTANCE);
 		
 		URI m2URI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\test\\bank_m2.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank_simple_m2_2.ecore");
 
 		URI baseURI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\test\\bank.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank_simple.ecore");
 		URI branch1URI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\test\\bank1.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank_simple1.ecore");
 		URI branch2URI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\test\\bank2.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank_simple3.ecore");
 		URI branch3URI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\test\\bank3.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank_simple2.ecore");
 
 		List<URI> uriList = new ArrayList<>();
 		uriList.add(baseURI);

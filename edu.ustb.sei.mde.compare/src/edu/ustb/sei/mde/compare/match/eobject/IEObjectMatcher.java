@@ -11,6 +11,8 @@
 package edu.ustb.sei.mde.compare.match.eobject;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.eclipse.emf.common.util.Monitor;
@@ -63,4 +65,8 @@ public interface IEObjectMatcher {
 	// lyt
 	void createMatches(Comparison comparisonADD, Iterator<EObject> leftEObjects, Iterator<EObject> rightEObjects,
 			Iterator<EObject> originEObjects, MultiKeyMap<EObject, Double> distanceMap);
+	
+	// lyt
+	void createMatches(Comparison comparisonSimilar, Iterator<? extends EObject> leftEObjects, Iterator<? extends EObject> rightEObjects,
+			Iterator<? extends EObject> originEObjects, Map<EObject, List<EObject>> eObjectSimilarMap);
 }

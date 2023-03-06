@@ -16,7 +16,7 @@ import com.google.common.collect.Maps;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.eclipse.emf.ecore.EClass;
@@ -160,6 +160,13 @@ public class ByTypeIndex implements EObjectIndex, MatchAheadOfTime {
 			MultiKeyMap<EObject, Double> distanceMap) {
 		EObjectIndex typeSpecificIndex = getOrCreate(obj);
 		return typeSpecificIndex.findClosests(inProgress, obj, side, distanceMap);
+	}
+	
+	// lyt
+	public Map<Side, EObject> findClosests(Comparison inProgress, EObject obj, Side side,
+			Map<EObject, List<EObject>> eObjectSimilarMap) {
+		EObjectIndex typeSpecificIndex = getOrCreate(obj);
+		return typeSpecificIndex.findClosests(inProgress, obj, side, eObjectSimilarMap);
 	}
 
 }

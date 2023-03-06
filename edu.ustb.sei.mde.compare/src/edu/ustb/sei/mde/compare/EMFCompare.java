@@ -17,6 +17,8 @@ import com.google.common.collect.Iterators;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.apache.log4j.Logger;
@@ -30,8 +32,6 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.Monitor;
 import org.eclipse.emf.ecore.EObject;
 
-import edu.ustb.sei.mde.compare.Comparison;
-import edu.ustb.sei.mde.compare.Match;
 import edu.ustb.sei.mde.compare.conflict.IConflictDetector;
 import edu.ustb.sei.mde.compare.conflict.MatchBasedConflictDetector;
 import edu.ustb.sei.mde.compare.diff.DefaultDiffEngine;
@@ -172,7 +172,6 @@ public class EMFCompare {
 	public static IComparisonScope createDefaultScope(Notifier left, Notifier right, Notifier origin) {
 		return new DefaultComparisonScope(left, right, origin);
 	}
-
 	/**
 	 * Computes and returns a new Comparison object representation the differences between Notifier in the
 	 * give {@code scope}.
@@ -691,6 +690,15 @@ public class EMFCompare {
 			
 		matchEngineFactoryRegistry.getHighestRankingMatchEngineFactory(scope)
 				.getMatchEngine().match(comparisonADD, leftEObjects, rightEObjects, distanceMap);
+		
+	}
+	
+	// lyt
+	public void compareSimilar(Comparison comparisonSimilar, IComparisonScope scope, Iterator<? extends EObject> leftEObjects,
+			Iterator<? extends EObject> rightEObjects, Map<EObject, List<EObject>> eObjectSimilarTreeMap) {
+			
+		matchEngineFactoryRegistry.getHighestRankingMatchEngineFactory(scope)
+				.getMatchEngine().match(comparisonSimilar, leftEObjects, rightEObjects, eObjectSimilarTreeMap);
 		
 	}
 

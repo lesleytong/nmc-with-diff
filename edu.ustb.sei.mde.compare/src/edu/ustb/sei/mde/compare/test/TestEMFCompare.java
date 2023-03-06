@@ -35,11 +35,11 @@ public class TestEMFCompare {
 		resourceSet.getPackageRegistry().put(EcorePackage.eNS_URI, EcorePackage.eINSTANCE);
 
 		URI baseURI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\test\\bank.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank_simple.ecore");
 		URI branch1URI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\test\\bank1.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank_simple1.ecore");
 		URI branch2URI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\test\\bank3.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank_simple2.ecore");
 
 		List<URI> uriList = new ArrayList<>();
 		uriList.add(baseURI);
@@ -72,6 +72,16 @@ public class TestEMFCompare {
 		scope = new DefaultComparisonScope(leftResource, rightResource, baseResource);
 		comparison = build.compare(scope);
 		
+		System.out.println("model element's container in branch1: ");
+		leftResource.getAllContents().forEachRemaining(e -> {
+			System.out.println("e: " + e);
+			System.out.println("e.eContainer(): " + e.eContainer());
+			System.out.println();
+		});
+		
+		
+		
+		
 		System.out.println("\n\n**************************Match");
 		comparison.getMatches().forEach(m -> {
 			System.out.println(m);
@@ -81,15 +91,15 @@ public class TestEMFCompare {
 		});
 
 		
-		System.out.println("\n\n**************************Diff");
-		comparison.getDifferences().forEach(d -> {
-			System.out.println("diff.Source: " + d.getSource());
-			System.out.println("diff.Match: " + d.getMatch());
-			System.out.println("diff: " + d);
-			System.out.println("diff.Requires: " + d.getRequires());
-			System.out.println("---");
-		});
-		
+//		System.out.println("\n\n**************************Diff");
+//		comparison.getDifferences().forEach(d -> {
+//			System.out.println("diff.Source: " + d.getSource());
+//			System.out.println("diff.Match: " + d.getMatch());
+//			System.out.println("diff: " + d);
+//			System.out.println("diff.Requires: " + d.getRequires());
+//			System.out.println("---");
+//		});
+//		
 		System.out.println("\n\n**************************Conflict");
 		comparison.getConflicts().forEach(c -> {
 			System.out.println(c);
@@ -98,14 +108,14 @@ public class TestEMFCompare {
 		});
 		
 		
-		IBatchMerger merger = new BatchMerger(IMerger.RegistryImpl.createStandaloneInstance());
-		
-		IMerger.Registry mergerRegistry = IMerger.RegistryImpl.createStandaloneInstance();
-		
-		for(Diff diff : comparison.getDifferences()) {
-			mergerRegistry.getHighestRankingMerger(diff).copyLeftToRight(diff, new BasicMonitor()); 
-			
-		}
+//		IBatchMerger merger = new BatchMerger(IMerger.RegistryImpl.createStandaloneInstance());
+//		
+//		IMerger.Registry mergerRegistry = IMerger.RegistryImpl.createStandaloneInstance();
+//		
+//		for(Diff diff : comparison.getDifferences()) {
+//			mergerRegistry.getHighestRankingMerger(diff).copyLeftToRight(diff, new BasicMonitor()); 
+//			
+//		}
 		
 		
 	}

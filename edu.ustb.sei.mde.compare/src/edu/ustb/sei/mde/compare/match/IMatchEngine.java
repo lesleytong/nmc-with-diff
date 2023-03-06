@@ -10,7 +10,9 @@
  *******************************************************************************/
 package edu.ustb.sei.mde.compare.match;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.eclipse.emf.common.util.Monitor;
@@ -158,4 +160,8 @@ public interface IMatchEngine {
 	// lyt
 	void match(Comparison comparisonADD, List<EObject> leftEObjects, List<EObject> rightEObjects,
 			MultiKeyMap<EObject, Double> distanceMap);
+	
+	// lyt
+	void match(Comparison comparisonSimilar, Iterator<? extends EObject> leftEObjects, Iterator<? extends EObject> rightEObjects,
+			Map<EObject, List<EObject>> eObjectSimilarTreeMap);
 }

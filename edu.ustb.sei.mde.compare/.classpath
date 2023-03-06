@@ -4,17 +4,18 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<attributes>
+			<attribute name="module" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="lib" path="C:/Users/10242/Desktop/commons-collections4-4.4.jar"/>
-	<classpathentry kind="lib" path="C:/Users/10242/Desktop/org.eclipse.uml2.uml_5.5.0.v20181203-1331.jar"/>
-	<classpathentry kind="lib" path="C:/Users/10242/Desktop/guava-15.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/Users/lesley/Documents/nwm/guava-15.0.jar"/>
+	<classpathentry kind="lib" path="/Users/lesley/Documents/nwm/commons-collections4-4.4.jar"/>
+	<classpathentry kind="lib" path="/Users/lesley/Documents/nwm/org.eclipse.uml2.uml_5.5.0.v20181203-1331.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

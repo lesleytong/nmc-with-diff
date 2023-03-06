@@ -173,6 +173,24 @@ public class EditionDistance implements DistanceFunction {
 		}
 		return measuredDist;
 	}
+		
+	// lyt
+	public double[] distance(EObject a, EObject b) {
+		double[] answer = new double[2];
+		
+		double maxDist = Math.max(getThresholdAmount(a), getThresholdAmount(b));
+		answer[0] = maxDist;
+		
+		double measuredDist = new CountingDiffEngine(maxDist, this.fakeComparison)
+				.measureDifferences(a, b);
+		
+		if (measuredDist > maxDist) {
+			measuredDist = Double.MAX_VALUE;
+		}
+		
+		answer[1] = measuredDist;		
+		return answer;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -504,6 +522,38 @@ public class EditionDistance implements DistanceFunction {
 				}
 
 			}
+			if (a.eContainingFeature() != b.eContainingFeature()) {
+				changes += Math.max(
+						weightProviderRegistry.getHighestRankingWeightProvider(a.eClass().getEPackage())
+								.getContainingFeatureWeight(a),
+						weightProviderRegistry.getHighestRankingWeightProvider(b.eClass().getEPackage())
+								.getContainingFeatureWeight(b));
+			}
+			if (changes <= maxDistance) {
+				checkForDifferences(fakeMatch, new BasicMonitor());
+				changes += getCounter().getComputedDistance();
+			}
+			return changes;
+
+		}
+		
+		// lyt
+		public double measureDifferences( EObject a, EObject b) {
+			Match fakeMatch = createOrUpdateFakeMatch(a, b);
+			getCounter().reset();
+			double changes = 0;
+
+			int aIndex = getContainmentIndex(a);
+			int bIndex = getContainmentIndex(b);
+			if (aIndex != bIndex) {
+				/*
+				 * we just want to pick the same positioned object if two exactly similar objects are
+				 * candidates in the same container.
+				 */
+				changes += 5;
+			}
+			
+			
 			if (a.eContainingFeature() != b.eContainingFeature()) {
 				changes += Math.max(
 						weightProviderRegistry.getHighestRankingWeightProvider(a.eClass().getEPackage())

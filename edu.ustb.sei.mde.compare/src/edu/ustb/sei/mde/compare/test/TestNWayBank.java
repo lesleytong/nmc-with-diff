@@ -44,18 +44,18 @@ public class TestNWayBank {
 //		needOrderSet.add("eStructuralFeatures");
 
 		URI m1URI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\edu\\ustb\\sei\\mde\\compare\\test\\bank_m1.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank_m1.ecore");
 		URI conflictURI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\edu\\ustb\\sei\\mde\\compare\\test\\bank_c.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank_c.ecore");
 
 		URI baseURI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\edu\\ustb\\sei\\mde\\compare\\test\\bank.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank.ecore");
 		URI branch1URI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\edu\\ustb\\sei\\mde\\compare\\test\\bank1.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank1.ecore");
 		URI branch2URI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\edu\\ustb\\sei\\mde\\compare\\test\\bank2.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank2.ecore");
 		URI branch3URI = URI
-				.createFileURI("E:\\eclipse-dsl202203\\edu.ustb.sei.mde.compare\\src\\edu\\ustb\\sei\\mde\\compare\\test\\bank3.ecore");
+				.createFileURI("/Users/lesley/git/nmc-with-diff/edu.ustb.sei.mde.compare/src/edu/ustb/sei/mde/compare/test/bank3.ecore");
 
 		List<URI> uriList = new ArrayList<>();
 		uriList.add(baseURI);

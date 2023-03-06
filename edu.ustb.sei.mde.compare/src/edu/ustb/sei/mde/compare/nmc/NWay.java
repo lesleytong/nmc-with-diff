@@ -66,12 +66,12 @@ public class NWay {
 		/**
 		 * 将原始模型与各个分支模型进行二向匹配 匹配上同一个原始元素的，划分到相同的匹配组
 		 */
-		Map<EObject, List<EObject>> nodeMatchGroups = new HashMap<>(); // 例如<eb, {e1, null, e3, ..., en}>
-		Map<EObject, List<EObject>> nodeAddMatchGroups = new HashMap<>(); // 例如<e3, {null, null, e3, e4, ..., null}>
+		Map<EObject, List<EObject>> nodeMatchGroups = new HashMap<>(); // 非新加节点的匹配组，例如<eb, {e1, null, e3, ..., en}>
+		Map<EObject, List<EObject>> nodeAddMatchGroups = new HashMap<>(); // 新加节点的匹配组，例如<e3, {null, null, e3, e4, ..., null}>
 
 		Map<Integer, List<EObject>> addMap = new HashMap<>();
 
-		// 还要记录非新加的匹配组，为了checkValid
+		// 还要记录非新加节点的匹配组，为了checkValid
 		Map<EObject, List<EObject>> nodesIndexMap = new HashMap<>();
 		// 为了处理代理对象
 		Map<EObject, List<EObject>> proxyHelperMap = new HashMap<>();
@@ -88,7 +88,7 @@ public class NWay {
 
 			// Match
 			for (Match match : comparison.getMatches()) {
-				// 各个分支模型和基础模型进行二向模型匹配后，得到非新加元素的匹配组
+				// 各个分支模型和基础模型进行二向模型匹配后，得到非新加节点的匹配组
 				baseTobranchMatchGroup(resourceMap, nodeMatchGroups, nodeAddMatchGroups, addMap,
 						nodesIndexMap, proxyHelperMap, i, match);
 				// submatch
@@ -113,13 +113,13 @@ public class NWay {
 		}
 				
 		/**
-		 * 计算预匹配信息：将分支i，分支j作为键 
+		 * 计算预匹配信息：将分支i，分支j作为键；将两个分支中得到的matching pairs作为值 
 		 */
 		MultiKeyMap<Integer, List<Match>> preMatchMap = new MultiKeyMap<>();
 		preMatch(nodeMatchGroups, preMatchMap);
 
 		/** 
-		 * 对于新加元素，两两比较分支模型 
+		 * 对于新加节点，两两比较分支模型 
 		 */
 		Set<EObject> vertices = new HashSet<>();
 		Set<Match> edges = new HashSet<>();
@@ -146,13 +146,13 @@ public class NWay {
 						scope = new DefaultComparisonScope(leftResource, rightResource, null);
 						build.compareADD(comparisonADD, scope, leftEObjects, rightEObjects, distanceMap);
 
-						// 过滤出新加元素的匹配
+						// 得到新加节点的匹配
 						int num = preMatchList.size();
 						List<Match> collect = comparisonADD.getMatches().stream().skip(num)
 								.filter(m -> m.getLeft() != null && m.getRight() != null)
 								.collect(Collectors.toList());
 
-						edges.addAll(collect);
+						edges.addAll(collect);	// 作为无向相似图的边
 
 					}
 				}
@@ -162,7 +162,7 @@ public class NWay {
 		/** 
 		 * 成团、排序、选择 
 		 */
-		// 初始化新加节点的相似图，调用BKPivot算法得出极大团
+		// 初始化新加节点的无向相似图，调用BKPivot算法得出极大团
 		MaximalCliquesWithPivot ff = new MaximalCliquesWithPivot();
 		ff.initGraph(vertices, edges);
 		List<List<EObject>> maximalCliques = new ArrayList<>();
@@ -174,7 +174,7 @@ public class NWay {
 		while (maximalCliques.size() > 0) {
 			Map<List<EObject>, Double> map = new HashMap<>();
 			for (List<EObject> clique : maximalCliques) {
-				// 筛选出container为空，或者container位于同一个匹配组的
+				// 筛选出clique中节点的container为空，或者container位于同一个匹配组的
 				if (checkValid(clique, nodesIndexMap)) {
 					int sum = 0;
 					for (int i = 0; i < clique.size() - 1; i++) {
@@ -201,7 +201,7 @@ public class NWay {
 				}
 			}
 
-			// 按照value进行排序（降序），取第一个作为匹配组
+			// 对map按照编辑距离进行降序排序，取第一个作为匹配组
 			Optional<Entry<List<EObject>, Double>> findFirst = map.entrySet().stream()
 					.sorted(Map.Entry.<List<EObject>, Double> comparingByValue().reversed()).findFirst();
 			List<EObject> matchGroup = findFirst.get().getKey();
@@ -238,10 +238,10 @@ public class NWay {
 				}
 			}
 
-			// 把分支新加的第一个作为key了，方便之后边的计算
+			// 把分支新加的第一个作为key，方便之后边的计算
 			nodeAddMatchGroups.put(matchGroup.get(0), nodeAddMatchGroup);
 
-			// lyt: 处理代理对象的问题。同样，将第一个作为key了，方便之后边的计算
+			// lyt: 处理代理对象的问题。同样，将第一个作为key，方便之后边的计算
 			if (firstProxyEObject != null) {
 				nodeAddMatchGroups.put(firstProxyEObject, proxyAddMatchGroup);
 			}
@@ -281,7 +281,7 @@ public class NWay {
 		Map<RefEdge, List<RefEdge>> refEdgeMatchGroupMap = new HashMap<>();
 		Map<RefEdgeMulti, List<RefEdgeMulti>> refEdgeMultiMatchGroupMap = new HashMap<>();
 
-		// 方便多值属性边和多值引用百年，序的计算
+		// 方便多值属性边和多值引用边的序的计算
 		MultiKeyMap<Object, ValEdgeMulti> valEdgeMultiHelper = new MultiKeyMap<>();
 		MultiKeyMap<Object, RefEdgeMulti> refEdgeMultiHelper = new MultiKeyMap<>();
 
@@ -290,7 +290,7 @@ public class NWay {
 				valEdgeMultiMatchGroupMap, refEdgeMatchGroupMap, refEdgeMultiMatchGroupMap,
 				valEdgeMultiHelper, refEdgeMultiHelper);
 
-		// 针对新加节点的边，需要4个Map
+		// 针对新加节点的边，同样需要4个Map
 		Map<ValEdge, List<ValEdge>> valEdgeAddMatchGroupMap = new HashMap<>();
 		Map<ValEdgeMulti, List<ValEdgeMulti>> valEdgeMultiAddMatchGroupMap = new HashMap<>();
 
@@ -327,7 +327,6 @@ public class NWay {
 		/** 
 		 * 再计算边的合并结果 
 		 */
-		
 		// ValEdge的合并结果
 		System.out.println("\n\n\n");
 		MultiKeyMap<Object, Object> valEdge_MultiKeyMap = new MultiKeyMap<>();
@@ -1914,7 +1913,7 @@ public class NWay {
 
 			EClass eClass = baseEObject.eClass();
 
-			// System.out.println("-----------------------------针对非新加节点的属性边（基础版本）------------------------------------------");
+			// System.out.println("-----------------------------针对非新加节点的属性边（原始模型）------------------------------------------");
 			for (EAttribute a : eClass.getEAllAttributes()) {
 
 				if (a.isChangeable() == false) {
@@ -1941,7 +1940,7 @@ public class NWay {
 				}
 			}
 
-			// System.out.println("----------------------------针对非新加节点的引用边（基础版本）-------------------------------------------");
+			// System.out.println("----------------------------针对非新加节点的引用边（原始模型）-------------------------------------------");
 			for (EReference r : eClass.getEAllReferences()) {
 
 				if (r.isChangeable() == false || r.getName().equals("eGenericType")
@@ -1985,7 +1984,7 @@ public class NWay {
 
 					EClass eClass2 = branchEObject.eClass(); // PENDING: may not the same as eClass.
 
-					// System.out.println("---------------------------针对非新加节点的属性边（分支版本）--------------------------------------------");
+					// System.out.println("---------------------------针对非新加节点的属性边（分支模型）--------------------------------------------");
 					for (EAttribute a2 : eClass2.getEAllAttributes()) {
 
 						if (a2.isChangeable() == false) {
@@ -2007,7 +2006,7 @@ public class NWay {
 						}
 					}
 
-					// System.out.println("----------------------------针对非新加节点的引用边（分支版本）-------------------------------------------");
+					// System.out.println("----------------------------针对非新加节点的引用边（分支模型）-------------------------------------------");
 					for (EReference r2 : eClass2.getEAllReferences()) {
 
 						if (r2.isChangeable() == false || r2.getName().equals("eGenericType")
@@ -2196,7 +2195,7 @@ public class NWay {
 	}
 
 	/**
-	 * 选择团时，先选container为空，或者container位于同一个匹配组的。
+	 * 选择团时，选择团中节点的container为空，或者container位于同一个匹配组的。
 	 */
 	private static boolean checkValid(List<EObject> clique, Map<EObject, List<EObject>> nodesIndexMap) {
 		List<EObject> origin = nodesIndexMap.get(clique.get(0).eContainer());
